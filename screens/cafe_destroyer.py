@@ -20,11 +20,12 @@ def run_game():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 40)
 
-    # Load everything
-    glass_ding, glass_break, game_music, mouse_sound = load_sounds(SOUND_DIR)
+    glass_ding, glass_break, game_music, mouse_sound,menu_music = load_sounds(SOUND_DIR)
     images, cat_width, cat_height = load_images(IMG_DIR, WIDTH, HEIGHT)
 
     background_bar = images["background"]
+    disco_bg1 = images["disco_bg1"]
+    disco_bg2 = images["disco_bg2"]
     beer_img = images["beer"]
     broken_beer_img = images["broken_beer"]
     mouse_img = images["mouse"]
@@ -43,40 +44,46 @@ def run_game():
     drop_timer = 0
     mouse_timer = 0
 
-    tray_width, tray_height = 200,70
+    tray_width, tray_height = 200, 70
     tray = pygame.Rect(WIDTH // 2 - tray_width // 2, HEIGHT - 120, tray_width, tray_height)
     tray_speed = 7
 
     glass_ding.set_volume(0.6)
-
     cups = []
-    cup_size = 25
     mice = []
+    cup_size = 25
     score = 0
     lives = 3
+
+    disco_mode = False
+    disco_timer = 0
 
     game_music.play(-1)
 
     while True:
-        screen.blit(background_bar, (0, 0))
+        if disco_mode:
+            disco_timer += 1
+            if (pygame.time.get_ticks() // 200) % 2 == 0:
+                screen.blit(disco_bg1, (0, 0))
+            else:
+                screen.blit(disco_bg2, (0, 0))
+        else:
+            screen.blit(background_bar, (0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        # Cat animation
         cat_anim_timer += cat_anim_speed
         if cat_anim_timer >= 1:
             cat_anim_timer = 0
             cat_frame_index = (cat_frame_index + 1) % len(cat_frames)
 
-        # Cat movement
         cat.x += cat_speed * cat_dir
         if cat.right >= WIDTH - 140 or cat.left <= 0:
             cat_dir *= -1
 
-        # Drop beers
         drop_timer += 1
         if drop_timer > random.randint(80, 160):
             cups.append({
@@ -88,7 +95,6 @@ def run_game():
             })
             drop_timer = 0
 
-        # Drop mice
         mouse_timer += 1
         if mouse_timer > random.randint(600, 1200):
             mice.append({
@@ -98,14 +104,12 @@ def run_game():
             })
             mouse_timer = 0
 
-        # Tray movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and tray.left > 0:
             tray.x -= tray_speed
         if keys[pygame.K_RIGHT] and tray.right < WIDTH:
             tray.x += tray_speed
 
-        # Update cups
         for cup in cups[:]:
             rect = cup["rect"]
             if cup["state"] == "falling":
@@ -114,6 +118,10 @@ def run_game():
                 if rect.colliderect(tray):
                     glass_ding.play()
                     score += 1
+
+                    if score >= 50:
+                        disco_mode = True
+
                     cups.remove(cup)
                     cat_speed = min(cat_base_speed + (score // 10), cat_max_speed)
 
@@ -131,9 +139,26 @@ def run_game():
                 if cup["timer"] <= 0:
                     cups.remove(cup)
 
-        # Update mice
+        screen.blit(tray_img, tray.topleft)
+
+        current_cat_image = cat_frames[cat_frame_index]
+        if cat_dir == -1:
+            current_cat_image = pygame.transform.flip(current_cat_image, True, False)
+        screen.blit(current_cat_image, cat.topleft)
+
+        for cup in cups:
+            if cup["state"] == "falling":
+                rotated = pygame.transform.rotate(beer_img, cup["angle"])
+            else:
+                rotated = broken_beer_img
+
+            rotated_rect = rotated.get_rect(center=cup["rect"].center)
+            screen.blit(rotated, rotated_rect.topleft)
+
         for m in mice[:]:
             rect = m["rect"]
+
+            rect.x += random.choice([-1, 0, 1])
             rect.y += m["speed"]
 
             if rect.colliderect(tray):
@@ -144,22 +169,8 @@ def run_game():
             elif rect.top > HEIGHT:
                 mice.remove(m)
 
-        # Draw everything
-        screen.blit(tray_img, tray.topleft)
-        current_cat_image = cat_frames[cat_frame_index]
-        if cat_dir == -1:
-            current_cat_image = pygame.transform.flip(current_cat_image, True, False)
-        screen.blit(current_cat_image, cat.topleft)
-
-        for cup in cups:
-            rotated = beer_img if cup["state"] == "falling" else broken_beer_img
-            rotated_rect = rotated.get_rect(center=cup["rect"].center)
-            screen.blit(rotated, rotated_rect.topleft)
-
         for m in mice:
-            rotated_mouse = pygame.transform.rotate(mouse_img, m["angle"])
-            rotated_rect = rotated_mouse.get_rect(center=m["rect"].center)
-            screen.blit(rotated_mouse, rotated_rect.topleft)
+            screen.blit(mouse_img, m["rect"].topleft)
 
         score_text = font.render(f"Score: {score}", True, WHITE)
         lives_text = font.render(f"Lives: {lives}", True, WHITE)
@@ -171,6 +182,7 @@ def run_game():
             screen.blit(over_text, (WIDTH // 2 - 100, HEIGHT // 2))
             pygame.display.flip()
             pygame.time.wait(2000)
+            pygame.mixer.stop()
             return
 
         pygame.display.flip()
