@@ -1,59 +1,93 @@
-import pygame, random, sys, os
+import os
+import sys
+import random
+import pygame
 
 pygame.init()
 
 WIDTH, HEIGHT = 1000, 700
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 40)
+WHITE = (255, 255, 255)
+RED = (200, 50, 50)
 
 BASE_DIR = os.path.dirname(__file__)
 IMG_DIR = os.path.join(BASE_DIR, "assets", "images")
+SOUND_DIR = os.path.join(BASE_DIR, "assets", "sounds")
 
-background_bar = pygame.image.load(os.path.join(IMG_DIR, "background_bar.jpeg")).convert()
-background_bar = pygame.transform.scale(background_bar, (WIDTH, HEIGHT))
-beer_img = pygame.image.load(os.path.join(IMG_DIR, "beer.png")).convert_alpha()
-beer_img = pygame.transform.scale(beer_img, (90, 90))
-cat_frames = [
-    pygame.transform.scale(pygame.image.load(os.path.join(IMG_DIR, "cat_walk1.png")).convert_alpha(), (20, 10)),
-    pygame.transform.scale(pygame.image.load(os.path.join(IMG_DIR, "cat_walk2.png")).convert_alpha(), (20, 10))
-]
-WHITE = (255, 255, 255)
-RED = (200, 50, 50)
-GREY = (100, 100, 100)
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Catch the Beer")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 40)
 
-cat_width, cat_height = 140, 120
+def load_images():
+    images = {}
+
+    # Background
+    bg = pygame.image.load(os.path.join(IMG_DIR, "background_bar.jpeg")).convert()
+    images["background"] = pygame.transform.scale(bg, (WIDTH, HEIGHT))
+
+    # Beer
+    beer = pygame.image.load(os.path.join(IMG_DIR, "beer.png")).convert_alpha()
+    images["beer"] = pygame.transform.scale(beer, (90, 90))
+
+    # Broken beer
+    broken = pygame.image.load(os.path.join(IMG_DIR, "broken_beer.png")).convert_alpha()
+    images["broken_beer"] = pygame.transform.scale(broken, (110, 110))
+
+    # Tray
+    tray = pygame.image.load(os.path.join(IMG_DIR, "tray.png")).convert_alpha()
+    images["tray"] = pygame.transform.scale(tray, (170, 80))
+
+    # Cat frames
+    cat_width, cat_height = 140, 120
+    images["cat_frames"] = [
+        pygame.transform.scale(
+            pygame.image.load(os.path.join(IMG_DIR, f"cat_walk{i}.png")).convert_alpha(),
+            (cat_width, cat_height)
+        )
+        for i in range(1, 3)
+    ]
+
+    return images, cat_width, cat_height
+def load_sounds():
+    glass_ding = pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_ding.wav"))
+    glass_break = pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_break.wav"))
+    game_music = pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_music.wav"))
+
+    return glass_ding, glass_break, game_music
+
+glass_ding, glass_break, game_music = load_sounds()
+
+images, cat_width, cat_height = load_images()
+background_bar = images["background"]
+beer_img = images["beer"]
+broken_beer_img = images["broken_beer"]
+tray_img = images["tray"]
+cat_frames = images["cat_frames"]
+
 cat_y = 140 - 65
-
-cat_frames = [
-    pygame.transform.scale(
-        pygame.image.load(os.path.join(IMG_DIR, "cat_walk1.png")).convert_alpha(),
-        (cat_width, cat_height)
-    ),
-    pygame.transform.scale(
-        pygame.image.load(os.path.join(IMG_DIR, "cat_walk2.png")).convert_alpha(),
-        (cat_width, cat_height)
-    )
-]
-
 cat_frame_index = 0
 cat_anim_timer = 0
 cat_anim_speed = 0.15
 cat = pygame.Rect(WIDTH // 2 - cat_width // 2, cat_y, cat_width, cat_height)
 cat_speed = 1
+cat_base_speed = 1
+cat_max_speed = 5
 cat_dir = 1
 drop_timer = 0
 
-
-tray_width, tray_height = 100, 20
-tray = pygame.Rect(WIDTH//2 - tray_width//2, HEIGHT - 100, tray_width, tray_height)
+tray_width, tray_height = 170,70
+tray = pygame.Rect(WIDTH // 2 - tray_width // 2, HEIGHT - 100, tray_width, tray_height)
 tray_speed = 7
+
+#volume
+glass_ding.set_volume(0.6)  # volume 0.0 - 1.0
 
 cups = []
 cup_size = 25
-
 score = 0
 lives = 3
+
+game_music.play(-1)
 
 while True:
     screen.blit(background_bar, (0, 0))
@@ -69,10 +103,7 @@ while True:
         cat_frame_index = (cat_frame_index + 1) % len(cat_frames)
 
     cat.x += cat_speed * cat_dir
-    RIGHT_LIMIT = WIDTH - 140
-    LEFT_LIMIT = 0
-
-    if cat.right >= RIGHT_LIMIT or cat.left <= LEFT_LIMIT:
+    if cat.right >= WIDTH - 140 or cat.left <= 0:
         cat_dir *= -1
 
     drop_timer += 1
@@ -80,7 +111,9 @@ while True:
         cups.append({
             "rect": pygame.Rect(cat.centerx, cat.bottom, cup_size, cup_size),
             "angle": random.randint(-15, 15),
-            "speed": random.uniform(2.0, 4.0)
+            "speed": random.uniform(2.0, 4.0),
+            "state": "falling",  # "falling" or "broken"
+            "timer": 0
         })
         drop_timer = 0
 
@@ -92,28 +125,44 @@ while True:
 
     for cup in cups[:]:
         rect = cup["rect"]
-        rect.y += cup["speed"]
 
-        if rect.colliderect(tray):
-            score += 1
-            cups.remove(cup)
-        elif rect.bottom >= HEIGHT:
-            lives -= 1
-            cups.remove(cup)
+        if cup["state"] == "falling":
+            rect.y += cup["speed"]
 
-    pygame.draw.rect(screen, GREY, tray)
+            if rect.colliderect(tray):
+                glass_ding.play()
+                score += 1
+                cups.remove(cup)
+                cat_speed = min(cat_base_speed + (score // 10), cat_max_speed)
+
+            elif rect.bottom >= HEIGHT - 10:
+                glass_break.play()
+                lives -= 1
+                cup["state"] = "broken"
+                cup["timer"] = 8  # show for x frames
+                rect.bottom = HEIGHT - 50
+                cup["speed"] = 0
+                cup["angle"] = random.randint(-5, 5)
+
+        elif cup["state"] == "broken":
+            cup["timer"] -= 1
+            if cup["timer"] <= 0:
+                cups.remove(cup)
+
+    screen.blit(tray_img, tray.topleft)
 
     current_cat_image = cat_frames[cat_frame_index]
     if cat_dir == -1:
         current_cat_image = pygame.transform.flip(current_cat_image, True, False)
-
     screen.blit(current_cat_image, cat.topleft)
 
     for cup in cups:
-        rect = cup["rect"]
-        angle = cup["angle"]
-        rotated = pygame.transform.rotate(beer_img, angle)
-        rotated_rect = rotated.get_rect(center=rect.center)
+        if cup["state"] == "falling":
+            rotated = pygame.transform.rotate(beer_img, cup["angle"])
+        else:
+            rotated = broken_beer_img
+
+        rotated_rect = rotated.get_rect(center=cup["rect"].center)
         screen.blit(rotated, rotated_rect.topleft)
 
     score_text = font.render(f"Score: {score}", True, WHITE)
@@ -123,7 +172,7 @@ while True:
 
     if lives <= 0:
         over_text = font.render("GAME OVER", True, RED)
-        screen.blit(over_text, (WIDTH//2 - 100, HEIGHT//2))
+        screen.blit(over_text, (WIDTH // 2 - 100, HEIGHT // 2))
         pygame.display.flip()
         pygame.time.wait(2000)
         pygame.quit()
