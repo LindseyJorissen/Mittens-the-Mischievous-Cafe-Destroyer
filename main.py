@@ -56,10 +56,12 @@ def load_sounds():
     glass_ding = pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_ding.wav"))
     glass_break = pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_break.wav"))
     game_music = pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_music.wav"))
+    mouse_sound = pygame.mixer.Sound(os.path.join(SOUND_DIR, "mouse.wav"))
 
-    return glass_ding, glass_break, game_music
 
-glass_ding, glass_break, game_music = load_sounds()
+    return glass_ding, glass_break, game_music,mouse_sound
+
+glass_ding, glass_break, game_music,mouse_sound = load_sounds()
 
 images, cat_width, cat_height = load_images()
 background_bar = images["background"]
@@ -170,6 +172,7 @@ while True:
         rect.y += mouse["speed"]
 
         if rect.colliderect(tray):
+            mouse_sound.play()
             score = max(0, score - 2)
             lives -= 1
             mice.remove(mouse)
