@@ -1,24 +1,18 @@
-import os
 import sys
 import random
 import pygame
 from core.assets import load_images, load_sounds
+from core.constants import WIDTH, HEIGHT, WHITE, RED, IMG_DIR, SOUND_DIR,load_fonts
 
 def run_game():
     pygame.init()
 
-    WIDTH, HEIGHT = 1000, 700
-    WHITE = (255, 255, 255)
-    RED = (200, 50, 50)
-
-    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    IMG_DIR = os.path.join(BASE_DIR, "assets", "images")
-    SOUND_DIR = os.path.join(BASE_DIR, "assets", "sounds")
+    fonts = load_fonts()
+    font = fonts["small"]
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Mittens the Mischievous Cafe Destroyer")
     clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 40)
 
     glass_ding, glass_break, game_music, mouse_sound,menu_music = load_sounds(SOUND_DIR)
     images, cat_width, cat_height = load_images(IMG_DIR, WIDTH, HEIGHT)

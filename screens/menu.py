@@ -3,24 +3,18 @@ import sys
 import os
 from screens import cafe_destroyer
 from core.assets import load_images, load_sounds
+from core.constants import WIDTH, HEIGHT, WHITE, YELLOW, IMG_DIR, SOUND_DIR,load_fonts
 
 def run_menu():
     pygame.init()
 
-    WIDTH, HEIGHT = 1000, 700
-    WHITE = (255, 255, 255)
-    YELLOW = (255, 215, 0)
-
-    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    IMG_DIR = os.path.join(BASE_DIR, "assets", "images")
-    SOUND_DIR = os.path.join(BASE_DIR, "assets", "sounds")
+    fonts = load_fonts()
+    font_large = fonts["large"]
+    font_small = fonts["medium"]
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Mittens - Main Menu")
     clock = pygame.time.Clock()
-
-    font_large = pygame.font.SysFont(None, 80)
-    font_small = pygame.font.SysFont(None, 50)
 
     images, cat_width, cat_height = load_images(IMG_DIR, WIDTH, HEIGHT)
     menu_bg = images["menu_bg"]
