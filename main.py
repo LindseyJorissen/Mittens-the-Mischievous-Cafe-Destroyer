@@ -1,4 +1,9 @@
+import pygame
 from screens import menu
 
-if __name__ == "__main__":
-    menu.run_menu()
+pygame.init()
+
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+WIDTH, HEIGHT = screen.get_size()
+
+menu.run_menu()
