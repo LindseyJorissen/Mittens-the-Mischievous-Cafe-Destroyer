@@ -54,7 +54,9 @@ def run_name_entry():
         'Y': pygame.Rect(525, 618, 65, 75),
         'Z': pygame.Rect(605, 618, 65, 75),
         'SPACE': pygame.Rect(685, 521, 130, 75),
-        'READY': pygame.Rect(685, 618, 130, 75),
+        'READY': pygame.Rect(685, 200, 130, 75),
+        'UNDO': pygame.Rect(685, 618, 130, 75),
+
     }
 
     orig_w, orig_h = 1024, 768
@@ -70,7 +72,7 @@ def run_name_entry():
         screen.blit(bg_scaled, (x_offset, y_offset))
 
         name_surface = font.render(name, True, (245, 220, 180))
-        name_rect = name_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 220))
+        name_rect = name_surface.get_rect(center=(WIDTH // 2-110, HEIGHT // 2 - 200))
         screen.blit(name_surface, name_rect)
 
         mouse_pos = pygame.mouse.get_pos()
@@ -95,6 +97,9 @@ def run_name_entry():
                     if rect.collidepoint(mouse_pos):
                         if label == 'SPACE':
                             name += ' '
+                        elif label == 'UNDO':
+                            if len(name) > 0:
+                                name = name[:-1]
                         elif label == 'READY':
                             if name.strip():
                                 save_name(name.strip())
