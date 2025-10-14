@@ -1,24 +1,23 @@
 import pygame
 import sys
-import os
 from screens import cafe_destroyer,leaderboard_screen
 from core.assets import load_images, load_sounds
-from core.constants import IMG_DIR, SOUND_DIR
+from core.constants import BROWN_SHADOW
 from core.utils import blit_centered_image
 
 def run_menu():
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    WIDTH, HEIGHT = screen.get_size()
     pygame.display.set_caption("Mittens - Main Menu")
     clock = pygame.time.Clock()
 
-    images, cat_width, cat_height = load_images(IMG_DIR, WIDTH, HEIGHT)
+    images = load_images()
     pub_closed = images["pub_closed"]
     pub_open = images["pub_open"]
-    glass_ding, glass_break, game_music, mouse_sound, menu_music, door_creak = load_sounds(SOUND_DIR)
 
+    sounds = load_sounds()
+    menu_music = sounds["menu_music"]
 
     menu_music.set_volume(0.5)
     menu_music.play(-1)
@@ -26,7 +25,6 @@ def run_menu():
     door_hovered_last = False
     base_door_rect = pygame.Rect(255, 370, 260, 490)
     base_leaderboard_rect = pygame.Rect(820, 185, 390, 130)
-
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -55,7 +53,7 @@ def run_menu():
         if is_hovered:
             blit_centered_image(screen, pub_open)
             if not door_hovered_last:
-                door_creak.play()
+                sounds["door_creak"].play()
             door_hovered_last = True
         else:
             blit_centered_image(screen, pub_closed)
@@ -63,10 +61,10 @@ def run_menu():
 
         if leaderboard_rect.collidepoint(mouse_pos):
             if not leaderboard_hovered_last:
-                mouse_sound.play()
+                sounds["knock_wood"].play()
             leaderboard_hovered_last = True
             shadow = pygame.Surface(leaderboard_rect.size, pygame.SRCALPHA)
-            shadow.fill((0, 0, 0, 100))  # translucent black overlay
+            shadow.fill(BROWN_SHADOW)  # translucent black overlay
             screen.blit(shadow, leaderboard_rect.topleft)
         else:
             leaderboard_hovered_last = False

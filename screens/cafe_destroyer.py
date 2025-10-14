@@ -1,10 +1,9 @@
-import math
-import sys
-import random
-import pygame
-from core.assets import load_images, load_sounds
-from core.constants import WHITE, RED, IMG_DIR, SOUND_DIR, load_fonts
+import math,sys,random,pygame
+
+from core.assets import load_images, load_sounds,load_fonts
+from core.constants import WHITE, RED
 from core.utils import blit_centered_image, update_score
+from screens import leaderboard_screen
 
 def run_game(player_name):
     pygame.init()
@@ -16,8 +15,9 @@ def run_game(player_name):
     pygame.display.set_caption("Mittens the Mischievous Cafe Destroyer")
     clock = pygame.time.Clock()
 
-    glass_ding, glass_break, game_music, mouse_sound, menu_music, door_creak = load_sounds(SOUND_DIR)
-    images, cat_width, cat_height = load_images(IMG_DIR, WIDTH, HEIGHT)
+    sounds = load_sounds()
+    images= load_images()
+
     background_bar = images["background"]
     disco_bg1 = images["disco_bg1"]
     disco_bg2 = images["disco_bg2"]
@@ -31,6 +31,7 @@ def run_game(player_name):
     cat_base_speed = 1.4
     cat_max_speed = 7
     cat_dir = 1
+    cat_width, cat_height = 130, 110
     drop_timer = 0
     mouse_timer = 0
     tray_speed = 10
@@ -40,8 +41,8 @@ def run_game(player_name):
     lives = 3
     disco_mode = False
     disco_timer = 0
-    glass_ding.set_volume(0.6)
-    game_music.play(-1)
+    sounds["glass_ding"].set_volume(0.6)
+    sounds["game_music"].play(-1)
 
     cat = pygame.Rect(0, 0, 1, 1)
     tray = pygame.Rect(0, 0, 1, 1)
@@ -64,6 +65,19 @@ def run_game(player_name):
                 sys.exit()
 
         keys = pygame.key.get_pressed()
+
+############# DEBUG / DEMO #############
+        if keys[pygame.K_1]:
+            score = 0
+        if keys[pygame.K_2]:
+            score = 20
+        if keys[pygame.K_3]:
+            score = 50
+        if keys[pygame.K_4]:
+            score = 75
+        if keys[pygame.K_5]:
+            score = 100
+########################################
 
         if disco_mode:
             disco_timer += 1
@@ -101,6 +115,9 @@ def run_game(player_name):
         if score >= 80:
             input_left, input_right = input_right, input_left
 
+        tray.y = bg_rect.bottom - int(bg_rect.height * 0.17)
+        TRAY_EDGE_MARGIN = int(bg_rect.width * 0.02)
+
         if keys[input_left] and tray.left > bg_rect.left + TRAY_EDGE_MARGIN:
             tray.x -= tray_speed
         if keys[input_right] and tray.right < bg_rect.right - TRAY_EDGE_MARGIN:
@@ -109,9 +126,6 @@ def run_game(player_name):
         if tray.width == 1:
             tray.width, tray.height = tray_scaled.get_size()
             tray.x = bg_rect.centerx - tray.width // 2
-
-        tray.y = bg_rect.bottom - int(bg_rect.height * 0.17)
-        TRAY_EDGE_MARGIN = int(bg_rect.width * 0.02)
 
         drop_timer += 1
         min_interval = 60
@@ -130,7 +144,6 @@ def run_game(player_name):
             drop_timer = 0
 
         mouse_timer += 1
-
         mouse_min_interval = 900
         mouse_max_interval = max(1100, 1600 - score * 3)
         if mouse_timer > random.randint(mouse_min_interval, mouse_max_interval):
@@ -148,14 +161,14 @@ def run_game(player_name):
             if cup["state"] == "falling":
                 rect.y += cup["speed"]
                 if rect.colliderect(tray):
-                    glass_ding.play()
+                    sounds["glass_ding"].play()
                     score += 1
                     if score >= 50:
                         disco_mode = True
                     cups.remove(cup)
                     cat_speed = min(cat_base_speed + (score // 10), cat_max_speed)
                 elif rect.bottom >= bg_rect.bottom:
-                    glass_break.play()
+                    sounds["glass_break"].play()
                     lives -= 1
                     cup["state"] = "broken"
                     cup["timer"] = 8
@@ -188,7 +201,7 @@ def run_game(player_name):
             rect.y += m["speed"]
 
             if rect.colliderect(tray):
-                mouse_sound.play()
+                sounds["mouse_sound"].play()
                 score = max(0, score - 2)
                 lives -= 1
                 mice.remove(m)
@@ -205,12 +218,40 @@ def run_game(player_name):
         screen.blit(lives_text, (bg_rect.right - lives_text.get_width() - 20, hud_y))
 
         if lives <= 0:
-            over_text = font.render("GAME OVER", True, RED)
-            screen.blit(over_text, (WIDTH // 2 - 100, HEIGHT // 2))
+            sounds["game_music"].stop()
+
             pygame.display.flip()
-            pygame.time.wait(2000)
+            frozen_frame = screen.copy()
+
+            overlay = pygame.Surface((WIDTH, HEIGHT))
+            overlay.fill((0, 0, 0))
+
+
+            channel = sounds["game_over"].play()
+
+            for alpha in range(0, 220, 5):
+                screen.blit(frozen_frame, (0, 0))
+                overlay.set_alpha(alpha)
+                screen.blit(overlay, (0, 0))
+
+                over_text = font.render("GAME OVER", True, RED)
+                text_rect = over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+                screen.blit(over_text, text_rect)
+
+                pygame.display.flip()
+                pygame.time.delay(30)
+
+            if channel is not None:
+                while channel.get_busy():
+                    pygame.time.wait(100)
+
+            pygame.time.wait(500)
+
             update_score(player_name, score)
             pygame.mixer.stop()
+
+            leaderboard_screen.run_screen(current_player_name=player_name)
+
             return
 
         if score >= 80:

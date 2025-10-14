@@ -1,65 +1,70 @@
 import os
 import pygame
+from core.constants import IMG_DIR,FONT_DIR,SOUND_DIR
 
-def load_images(img_dir, width, height):
+def load_fonts():
+    pygame.font.init()
+    fonts = {
+        "small": pygame.font.Font(os.path.join(FONT_DIR, "BoldPixels.ttf"), 40),
+        "medium": pygame.font.Font(os.path.join(FONT_DIR, "BoldPixels.ttf"), 60),
+        "large": pygame.font.Font(os.path.join(FONT_DIR, "Ka1.ttf"), 80)
+    }
+    return fonts
+
+def load_images():
+
     images = {}
 
-    #Bar backgrounds
-    bg = pygame.image.load(os.path.join(img_dir, "background_bar.jpeg")).convert()
+    bg = pygame.image.load(os.path.join(IMG_DIR, "background_bar.jpeg")).convert()
     images["background"] = bg
 
-    disco_bg1 = pygame.image.load(os.path.join(img_dir, "disco_bg1.jpeg")).convert()
+    disco_bg1 = pygame.image.load(os.path.join(IMG_DIR, "disco_bg1.jpeg")).convert()
     images["disco_bg1"] = disco_bg1
 
-    disco_bg2 = pygame.image.load(os.path.join(img_dir, "disco_bg2.jpeg")).convert()
+    disco_bg2 = pygame.image.load(os.path.join(IMG_DIR, "disco_bg2.jpeg")).convert()
     images["disco_bg2"] = disco_bg2
 
-    pub_open = pygame.image.load(os.path.join(img_dir, "pub_open.jpeg")).convert()
+    pub_open = pygame.image.load(os.path.join(IMG_DIR, "pub_open.jpeg")).convert()
     images["pub_open"] = pub_open
 
-    pub_closed = pygame.image.load(os.path.join(img_dir, "pub_closed.jpeg")).convert()
+    pub_closed = pygame.image.load(os.path.join(IMG_DIR, "pub_closed.jpeg")).convert()
     images["pub_closed"] = pub_closed
 
-    images["leaderboard"] = pygame.image.load(os.path.join(img_dir, "leaderboard.jpeg")).convert()
-    images["name_input"] = pygame.image.load(os.path.join(img_dir, "name_input.jpeg")).convert()
+    images["leaderboard"] = pygame.image.load(os.path.join(IMG_DIR, "leaderboard.jpeg")).convert()
+    images["name_input"] = pygame.image.load(os.path.join(IMG_DIR, "name_input.jpeg")).convert()
 
-    #Beer
-    beer = pygame.image.load(os.path.join(img_dir, "beer.png")).convert_alpha()
+    beer = pygame.image.load(os.path.join(IMG_DIR, "beer.png")).convert_alpha()
     images["beer"] = pygame.transform.scale(beer, (90, 90))
 
-    #Broken beer
-    broken = pygame.image.load(os.path.join(img_dir, "broken_beer.png")).convert_alpha()
+    broken = pygame.image.load(os.path.join(IMG_DIR, "broken_beer.png")).convert_alpha()
     images["broken_beer"] = pygame.transform.scale(broken, (110, 110))
 
-    #Mouse
-    mouse = pygame.image.load(os.path.join(img_dir, "mouse.png")).convert_alpha()
+    mouse = pygame.image.load(os.path.join(IMG_DIR, "mouse.png")).convert_alpha()
     images["mouse"] = pygame.transform.scale(mouse, (50, 160))
 
-    #Tray
-    tray = pygame.image.load(os.path.join(img_dir, "tray_with_hands.png")).convert_alpha()
+    tray = pygame.image.load(os.path.join(IMG_DIR, "tray_with_hands.png")).convert_alpha()
     images["tray"] = pygame.transform.scale(tray, (260, 100))
 
-    #Cat frames
-    cat_width = 130
-    cat_height = 110
-
-    cat_frame_1 = pygame.image.load(os.path.join(img_dir, "cat_walk1.png")).convert_alpha()
-    cat_frame_1 = pygame.transform.scale(cat_frame_1, (cat_width, cat_height))
-
-    cat_frame_2 = pygame.image.load(os.path.join(img_dir, "cat_walk2.png")).convert_alpha()
-    cat_frame_2 = pygame.transform.scale(cat_frame_2, (cat_width, cat_height))
+    cat_frame_1 = pygame.image.load(os.path.join(IMG_DIR, "cat_walk1.png")).convert_alpha()
+    cat_frame_1 = pygame.transform.scale(cat_frame_1, (130, 110))
+    cat_frame_2 = pygame.image.load(os.path.join(IMG_DIR, "cat_walk2.png")).convert_alpha()
+    cat_frame_2 = pygame.transform.scale(cat_frame_2, (130, 110))
 
     images["cat_frames"] = [cat_frame_1, cat_frame_2]
 
-    return images, cat_width, cat_height
+    return images
 
+def load_sounds():
+    sounds = {
+        "glass_ding": pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_ding.wav")),
+        "glass_break": pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_break.wav")),
+        "game_music": pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_music.wav")),
+        "mouse_sound": pygame.mixer.Sound(os.path.join(SOUND_DIR, "mouse.wav")),
+        "menu_music": pygame.mixer.Sound(os.path.join(SOUND_DIR, "menu_music.wav")),
+        "door_creak": pygame.mixer.Sound(os.path.join(SOUND_DIR, "door_creak.wav")),
+        "knock_wood": pygame.mixer.Sound(os.path.join(SOUND_DIR, "knock_wood.wav")),
+        "cat_meow": pygame.mixer.Sound(os.path.join(SOUND_DIR, "cat_meow.mp3")),
+        "game_over": pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_over.mp3"))
 
-def load_sounds(sound_dir):
-
-    glass_ding = pygame.mixer.Sound(os.path.join(sound_dir, "glass_ding.wav"))
-    glass_break = pygame.mixer.Sound(os.path.join(sound_dir, "glass_break.wav"))
-    game_music = pygame.mixer.Sound(os.path.join(sound_dir, "game_music.wav"))
-    mouse_sound = pygame.mixer.Sound(os.path.join(sound_dir, "mouse.wav"))
-    menu_music = pygame.mixer.Sound(os.path.join(sound_dir, "menu_music.wav"))
-    door_creak = pygame.mixer.Sound(os.path.join(sound_dir, "door_creak.wav"))
-    return glass_ding, glass_break, game_music, mouse_sound, menu_music, door_creak
+    }
+    return sounds

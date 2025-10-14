@@ -2,9 +2,9 @@ import pygame
 import sys
 import json
 import os
-from core.constants import IMG_DIR,load_fonts, LEADERBOARD_FILE
+from core.constants import LEADERBOARD_FILE, GOLD, BROWN_SHADOW
 from core.utils import blit_centered_image
-from core.assets import load_images
+from core.assets import load_images,load_fonts,load_sounds
 
 def run_name_entry():
     pygame.init()
@@ -12,7 +12,9 @@ def run_name_entry():
     WIDTH, HEIGHT = screen.get_size()
     clock = pygame.time.Clock()
 
-    images, _, _ = load_images(IMG_DIR, WIDTH, HEIGHT)
+    sounds = load_sounds()
+
+    images= load_images()
     bg = images["name_input"]
     bg_rect = blit_centered_image(screen, bg)
 
@@ -67,7 +69,7 @@ def run_name_entry():
     while running:
         bg_rect = blit_centered_image(screen, bg)
 
-        name_surface = font.render(name, True, (245, 220, 180))
+        name_surface = font.render(name, True, GOLD)
         name_rect = name_surface.get_rect(
             center=(bg_rect.centerx - 110, bg_rect.centery - 200)
         )
@@ -77,10 +79,10 @@ def run_name_entry():
         for label, rect in buttons.items():
             if rect.collidepoint(mouse_pos):
                 shadow = pygame.Surface(rect.size, pygame.SRCALPHA)
-                shadow.fill((255, 255, 255, 50))
+                shadow.fill(BROWN_SHADOW)
                 screen.blit(shadow, rect.topleft)
 
-        hint_text = hint_font.render("Press ESC to return", True,(255, 230, 160))
+        hint_text = hint_font.render("Press ESC to return", True, GOLD)
         hint_rect = hint_text.get_rect(center=(WIDTH // 2, HEIGHT - 50))
         screen.blit(hint_text, hint_rect)
 
@@ -93,12 +95,14 @@ def run_name_entry():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for label, rect in buttons.items():
                     if rect.collidepoint(mouse_pos):
+                        sounds["knock_wood"].play()
                         if label == 'SPACE':
                             name += ' '
                         elif label == 'UNDO':
                             if len(name) > 0:
                                 name = name[:-1]
                         elif label == 'READY':
+                            sounds["cat_meow"].play()
                             if name.strip():
                                 save_name(name.strip())
                             return name.strip()
