@@ -20,6 +20,9 @@ def load_images(img_dir, width, height):
     pub_closed = pygame.image.load(os.path.join(img_dir, "pub_closed.jpeg")).convert()
     images["pub_closed"] = pub_closed
 
+    images["leaderboard"] = pygame.image.load(os.path.join(img_dir, "leaderboard.jpeg")).convert()
+    images["name_input"] = pygame.image.load(os.path.join(img_dir, "name_input.jpeg")).convert()
+
     #Beer
     beer = pygame.image.load(os.path.join(img_dir, "beer.png")).convert_alpha()
     images["beer"] = pygame.transform.scale(beer, (90, 90))

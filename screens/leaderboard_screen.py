@@ -4,6 +4,7 @@ import json
 import os
 from core.constants import IMG_DIR,load_fonts
 from core.utils import blit_centered_image
+from core.assets import load_images
 
 def run_screen():
     pygame.init()
@@ -12,9 +13,8 @@ def run_screen():
     clock = pygame.time.Clock()
     pygame.display.set_caption("Leaderboard")
 
-    bg_path = os.path.join(IMG_DIR, "leaderboard.jpeg")
-    bg = pygame.image.load(bg_path).convert()
-
+    images, _, _ = load_images(IMG_DIR, WIDTH, HEIGHT)
+    bg = images["leaderboard"]
 
     fonts = load_fonts()
     hint_font = fonts["small"]

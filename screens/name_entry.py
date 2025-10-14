@@ -3,6 +3,8 @@ import sys
 import json
 import os
 from core.constants import IMG_DIR,load_fonts, LEADERBOARD_FILE
+from core.utils import blit_centered_image
+from core.assets import load_images
 
 def run_name_entry():
     pygame.init()
@@ -10,18 +12,13 @@ def run_name_entry():
     WIDTH, HEIGHT = screen.get_size()
     clock = pygame.time.Clock()
 
+    images, _, _ = load_images(IMG_DIR, WIDTH, HEIGHT)
+    bg = images["name_input"]
+    bg_rect = blit_centered_image(screen, bg)
+
     fonts = load_fonts()
     hint_font = fonts["small"]
     font = fonts["medium"]
-
-    bg = pygame.image.load(os.path.join(IMG_DIR, "name_input.jpeg")).convert()
-    orig_w, orig_h = bg.get_size()
-    scale = min(WIDTH / orig_w, HEIGHT / orig_h)
-    scaled_w, scaled_h = int(orig_w * scale), int(orig_h * scale)
-    bg_scaled = pygame.transform.smoothscale(bg, (scaled_w, scaled_h))
-
-    x_offset = (WIDTH - scaled_w) // 2
-    y_offset = (HEIGHT - scaled_h) // 2
 
     name = ""
     running = True
@@ -68,11 +65,12 @@ def run_name_entry():
     }
 
     while running:
-        screen.fill((0, 0, 0))
-        screen.blit(bg_scaled, (x_offset, y_offset))
+        bg_rect = blit_centered_image(screen, bg)
 
         name_surface = font.render(name, True, (245, 220, 180))
-        name_rect = name_surface.get_rect(center=(WIDTH // 2-110, HEIGHT // 2 - 200))
+        name_rect = name_surface.get_rect(
+            center=(bg_rect.centerx - 110, bg_rect.centery - 200)
+        )
         screen.blit(name_surface, name_rect)
 
         mouse_pos = pygame.mouse.get_pos()
