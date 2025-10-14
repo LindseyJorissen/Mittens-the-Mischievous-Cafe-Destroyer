@@ -1,31 +1,12 @@
+import math
 import sys
 import random
 import pygame
 from core.assets import load_images, load_sounds
 from core.constants import WHITE, RED, IMG_DIR, SOUND_DIR, load_fonts
-from core.utils import blit_centered_image
+from core.utils import blit_centered_image, update_score
 
-def blit_centered_image(screen, image):
-    screen_width, screen_height = screen.get_size()
-    img_width, img_height = image.get_size()
-    img_aspect = img_width / img_height
-    screen_aspect = screen_width / screen_height
-
-    if img_aspect > screen_aspect:
-        new_width = screen_width
-        new_height = int(screen_width / img_aspect)
-        x, y = 0, (screen_height - new_height) // 2
-    else:
-        new_height = screen_height
-        new_width = int(screen_height * img_aspect)
-        x, y = (screen_width - new_width) // 2, 0
-
-    scaled = pygame.transform.smoothscale(image, (new_width, new_height))
-    screen.fill((0, 0, 0))
-    screen.blit(scaled, (x, y))
-    return pygame.Rect(x, y, new_width, new_height)
-
-def run_game():
+def run_game(player_name):
     pygame.init()
     fonts = load_fonts()
     font = fonts["small"]
@@ -65,13 +46,24 @@ def run_game():
     cat = pygame.Rect(0, 0, 1, 1)
     tray = pygame.Rect(0, 0, 1, 1)
 
+    def drunk_distortion(surface, t):
+        width, height = surface.get_size()
+        distorted = pygame.Surface((width, height))
+        for y in range(height):
+            offset = int(math.sin(y / 30.0 + t / 200.0) * 8)
+            src_rect = pygame.Rect(0, y, width, 1)
+            dst_rect = pygame.Rect(offset, y, width, 1)
+            distorted.blit(surface, dst_rect, src_rect)
+        return distorted
+
     while True:
-        keys = pygame.key.get_pressed()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+
+        keys = pygame.key.get_pressed()
 
         if disco_mode:
             disco_timer += 1
@@ -103,33 +95,50 @@ def run_game():
         if cat.right >= bg_rect.right - CAT_RIGHT_MARGIN or cat.left <= bg_rect.left + CAT_LEFT_MARGIN:
             cat_dir *= -1
 
+        input_left = pygame.K_LEFT
+        input_right = pygame.K_RIGHT
+
+        if score >= 80:
+            input_left, input_right = input_right, input_left
+
+        if keys[input_left] and tray.left > bg_rect.left + TRAY_EDGE_MARGIN:
+            tray.x -= tray_speed
+        if keys[input_right] and tray.right < bg_rect.right - TRAY_EDGE_MARGIN:
+            tray.x += tray_speed
+
         if tray.width == 1:
             tray.width, tray.height = tray_scaled.get_size()
             tray.x = bg_rect.centerx - tray.width // 2
 
         tray.y = bg_rect.bottom - int(bg_rect.height * 0.17)
         TRAY_EDGE_MARGIN = int(bg_rect.width * 0.02)
-        if keys[pygame.K_LEFT] and tray.left > bg_rect.left + TRAY_EDGE_MARGIN:
-            tray.x -= tray_speed
-        if keys[pygame.K_RIGHT] and tray.right < bg_rect.right - TRAY_EDGE_MARGIN:
-            tray.x += tray_speed
 
         drop_timer += 1
-        if drop_timer > random.randint(80, 160):
+        min_interval = 60
+        max_interval = 160 - int(score * 0.3)
+        max_interval = max(min_interval, max_interval)
+        base_speed = 3.0
+        bonus = min(score * 0.015, 3.0)
+        if drop_timer > random.randint(min_interval, max_interval):
             cups.append({
                 "rect": pygame.Rect(cat.centerx, cat.bottom, int(37 * scale_factor), int(37 * scale_factor)),
                 "angle": random.randint(-15, 15),
-                "speed": random.uniform(3.0, 6.0),
+                "speed": random.uniform(base_speed + bonus, base_speed + 3 + bonus / 2),
                 "state": "falling",
                 "timer": 0
             })
             drop_timer = 0
 
         mouse_timer += 1
-        if mouse_timer > random.randint(600, 1200):
+
+        mouse_min_interval = 900
+        mouse_max_interval = max(1100, 1600 - score * 3)
+        if mouse_timer > random.randint(mouse_min_interval, mouse_max_interval):
+            mouse_x = cat.centerx + random.choice([-200, 200])
+            mouse_x = max(bg_rect.left + 50, min(bg_rect.right - 50, mouse_x))
             mice.append({
-                "rect": pygame.Rect(cat.centerx, cat.bottom, int(82 * scale_factor), int(59 * scale_factor)),
-                "speed": random.uniform(7.0, 10.0),
+                "rect": pygame.Rect(mouse_x, cat.bottom, int(82 * scale_factor), int(59 * scale_factor)),
+                "speed": random.uniform(6.0, 9.0),
                 "angle": random.randint(-10, 10)
             })
             mouse_timer = 0
@@ -200,8 +209,13 @@ def run_game():
             screen.blit(over_text, (WIDTH // 2 - 100, HEIGHT // 2))
             pygame.display.flip()
             pygame.time.wait(2000)
+            update_score(player_name, score)
             pygame.mixer.stop()
             return
+
+        if score >= 80:
+            distorted = drunk_distortion(screen, pygame.time.get_ticks())
+            screen.blit(distorted, (0, 0))
 
         pygame.display.flip()
         clock.tick(60)

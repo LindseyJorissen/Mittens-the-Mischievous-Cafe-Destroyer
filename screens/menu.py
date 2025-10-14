@@ -19,6 +19,7 @@ def run_menu():
     pub_open = images["pub_open"]
     glass_ding, glass_break, game_music, mouse_sound, menu_music, door_creak = load_sounds(SOUND_DIR)
 
+
     menu_music.set_volume(0.5)
     menu_music.play(-1)
 
@@ -80,8 +81,11 @@ def run_menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if door_rect.collidepoint(mouse_pos):
                     menu_music.stop()
-                    cafe_destroyer.run_game()
-                    menu_music.play(-1)
+                    from screens import name_entry
+                    player_name = name_entry.run_name_entry()
+                    if player_name:
+                        cafe_destroyer.run_game(player_name)
+                        menu_music.play(-1)
                 elif leaderboard_rect.collidepoint(mouse_pos):
                     menu_music.stop()
                     leaderboard_screen.run_screen()
