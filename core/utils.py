@@ -1,7 +1,7 @@
 import pygame
 import json
 import os
-from constants import LEADERBOARD_FILE
+from core.constants import LEADERBOARD_FILE
 
 def update_score(player_name, new_score):
 
