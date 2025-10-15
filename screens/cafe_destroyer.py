@@ -94,7 +94,7 @@ def run_game(player_name):
         broken_scaled = pygame.transform.smoothscale(broken_beer_img, (int(110 * scale_factor), int(110 * scale_factor)))
         mouse_scaled = pygame.transform.smoothscale(mouse_img, (int(50 * scale_factor), int(160 * scale_factor)))
 
-        cat_anim_timer = pygame.time.get_ticks() / 1000.0 * 0.15
+        cat_anim_timer = pygame.time.get_ticks() / 1000.0 * 6
         cat_frame_index = int(cat_anim_timer) % len(cat_scaled)
 
         if cat.width == 1:

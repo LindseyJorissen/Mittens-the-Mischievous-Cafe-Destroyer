@@ -45,12 +45,15 @@ def load_images():
     tray = pygame.image.load(os.path.join(IMG_DIR, "tray_with_hands.png")).convert_alpha()
     images["tray"] = pygame.transform.scale(tray, (260, 100))
 
-    cat_frame_1 = pygame.image.load(os.path.join(IMG_DIR, "cat_walk1.png")).convert_alpha()
+    cat_frame_1 = pygame.image.load(os.path.join(IMG_DIR, "cat1.png")).convert_alpha()
     cat_frame_1 = pygame.transform.scale(cat_frame_1, (130, 110))
-    cat_frame_2 = pygame.image.load(os.path.join(IMG_DIR, "cat_walk2.png")).convert_alpha()
+    cat_frame_2 = pygame.image.load(os.path.join(IMG_DIR, "cat2.png")).convert_alpha()
     cat_frame_2 = pygame.transform.scale(cat_frame_2, (130, 110))
-
-    images["cat_frames"] = [cat_frame_1, cat_frame_2]
+    cat_frame_3 = pygame.image.load(os.path.join(IMG_DIR, "cat3.png")).convert_alpha()
+    cat_frame_3 = pygame.transform.scale(cat_frame_3, (130, 110))
+    cat_frame_4 = pygame.image.load(os.path.join(IMG_DIR, "cat4.png")).convert_alpha()
+    cat_frame_4 = pygame.transform.scale(cat_frame_4, (130, 110))
+    images["cat_frames"] = [cat_frame_1, cat_frame_2,cat_frame_3,cat_frame_4]
 
     return images
 
@@ -58,8 +61,8 @@ def load_sounds():
     sounds = {
         "glass_ding": pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_ding.wav")),
         "glass_break": pygame.mixer.Sound(os.path.join(SOUND_DIR, "glass_break.wav")),
-        "game_music": pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_music.wav")),
-        "mouse_sound": pygame.mixer.Sound(os.path.join(SOUND_DIR, "mouse.wav")),
+        "game_music": pygame.mixer.Sound(os.path.join(SOUND_DIR, "game_music.mp3")),
+        "mouse_sound": pygame.mixer.Sound(os.path.join(SOUND_DIR, "mouse.mp3")),
         "menu_music": pygame.mixer.Sound(os.path.join(SOUND_DIR, "menu_music.wav")),
         "door_creak": pygame.mixer.Sound(os.path.join(SOUND_DIR, "door_creak.wav")),
         "knock_wood": pygame.mixer.Sound(os.path.join(SOUND_DIR, "knock_wood.wav")),
