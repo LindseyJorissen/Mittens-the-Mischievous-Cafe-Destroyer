@@ -6,7 +6,6 @@ from core.constants import BROWN_SHADOW
 from core.utils import blit_centered_image
 
 def run_menu():
-    pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     pygame.display.set_caption("Mittens - Main Menu")
@@ -79,9 +78,10 @@ def run_menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if door_rect.collidepoint(mouse_pos):
                     menu_music.stop()
-                    from screens import name_entry
+                    from screens import name_entry,tutorial_screen
                     player_name = name_entry.run_name_entry()
                     if player_name:
+                        tutorial_screen.run_tutorial()
                         cafe_destroyer.run_game(player_name)
                         menu_music.play(-1)
                 elif leaderboard_rect.collidepoint(mouse_pos):

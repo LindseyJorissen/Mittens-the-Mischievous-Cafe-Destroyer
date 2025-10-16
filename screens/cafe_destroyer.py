@@ -6,17 +6,16 @@ from core.utils import blit_centered_image, update_score
 from screens import leaderboard_screen
 
 def run_game(player_name):
-    pygame.init()
-    fonts = load_fonts()
-    font = fonts["small"]
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     WIDTH, HEIGHT = screen.get_size()
     pygame.display.set_caption("Mittens the Mischievous Cafe Destroyer")
     clock = pygame.time.Clock()
-
     sounds = load_sounds()
+
     images= load_images()
+    fonts = load_fonts()
+    font = fonts["small"]
 
     background_bar = images["background"]
     disco_bg1 = images["disco_bg1"]

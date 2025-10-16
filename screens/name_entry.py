@@ -7,7 +7,6 @@ from core.utils import blit_centered_image
 from core.assets import load_images,load_fonts,load_sounds
 
 def run_name_entry():
-    pygame.init()
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     WIDTH, HEIGHT = screen.get_size()
     clock = pygame.time.Clock()

@@ -1,8 +1,20 @@
 {
   "players": [
     {
+      "name": "OSCAR",
+      "score": 152
+    },
+    {
+      "name": "SALU",
+      "score": 150
+    },
+    {
       "name": "LINDSEY",
       "score": 124
+    },
+    {
+      "name": "D",
+      "score": 0
     }
   ]
 }
