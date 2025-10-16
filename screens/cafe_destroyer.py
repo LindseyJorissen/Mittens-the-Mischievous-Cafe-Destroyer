@@ -1,16 +1,16 @@
 import math,sys,random,pygame
 
 from core.assets import load_images, load_sounds,load_fonts
-from core.constants import WHITE, RED
+from core.constants import WHITE, RED, DEBUG_RED_OVERLAY,DEBUG_RED
 from core.utils import blit_centered_image, update_score
 from screens import leaderboard_screen
 
 def run_game(player_name):
-
+    debug_toggle = True
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     WIDTH, HEIGHT = screen.get_size()
-    pygame.display.set_caption("Mittens the Mischievous Cafe Destroyer")
     clock = pygame.time.Clock()
+
     sounds = load_sounds()
 
     images= load_images()
@@ -148,8 +148,14 @@ def run_game(player_name):
         if mouse_timer > random.randint(mouse_min_interval, mouse_max_interval):
             mouse_x = cat.centerx + random.choice([-200, 200])
             mouse_x = max(bg_rect.left + 50, min(bg_rect.right - 50, mouse_x))
+            mouse_rect = pygame.Rect(
+                mouse_x,
+                cat.bottom + int(20 * scale_factor),
+                int(45 * scale_factor),
+                int(160 * scale_factor)
+            )
             mice.append({
-                "rect": pygame.Rect(mouse_x, cat.bottom, int(82 * scale_factor), int(59 * scale_factor)),
+                "rect": mouse_rect,
                 "speed": random.uniform(6.0, 9.0),
                 "angle": random.randint(-10, 10)
             })
@@ -256,6 +262,35 @@ def run_game(player_name):
         if score >= 80:
             distorted = drunk_distortion(screen, pygame.time.get_ticks())
             screen.blit(distorted, (0, 0))
+
+        ################ DEBUG COLLISION #################
+        if debug_toggle:
+            # CAT
+            pygame.draw.rect(screen, DEBUG_RED, cat, 2)
+            cat_overlay = pygame.Surface(cat.size, pygame.SRCALPHA)
+            cat_overlay.fill(DEBUG_RED_OVERLAY)
+            screen.blit(cat_overlay, cat.topleft)
+
+            # TRAY
+            pygame.draw.rect(screen, DEBUG_RED, tray, 2)
+            tray_overlay = pygame.Surface(tray.size, pygame.SRCALPHA)
+            tray_overlay.fill(DEBUG_RED_OVERLAY)
+            screen.blit(tray_overlay, tray.topleft)
+
+            # CUPS
+            for cup in cups:
+                pygame.draw.rect(screen, DEBUG_RED, cup["rect"], 2)
+                cup_overlay = pygame.Surface(cup["rect"].size, pygame.SRCALPHA)
+                cup_overlay.fill(DEBUG_RED_OVERLAY)
+                screen.blit(cup_overlay, cup["rect"].topleft)
+
+            # MICE
+            for m in mice:
+                pygame.draw.rect(screen, DEBUG_RED, m["rect"], 2)
+                mouse_overlay = pygame.Surface(m["rect"].size, pygame.SRCALPHA)
+                mouse_overlay.fill(DEBUG_RED_OVERLAY)
+                screen.blit(mouse_overlay, m["rect"].topleft)
+        ###############################
 
         pygame.display.flip()
         clock.tick(60)

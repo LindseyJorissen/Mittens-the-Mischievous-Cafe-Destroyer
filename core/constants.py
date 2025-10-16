@@ -7,6 +7,8 @@ RED = (200, 50, 50) #game over text
 GOLD = (197, 175, 108) #hint texts, leaderboard title
 YELLOW = (255, 192, 0) #current player in leaderboard
 BROWN_SHADOW = (51, 27, 5, 50) #overlay over knoppen
+DEBUG_RED_OVERLAY = (255, 0, 0, 60)
+DEBUG_RED = (255, 0, 0)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 IMG_DIR = os.path.join(BASE_DIR, "assets", "images")

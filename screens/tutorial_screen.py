@@ -1,7 +1,7 @@
 import pygame
 import sys
 from core.assets import load_images, load_fonts
-from core.constants import GOLD
+from core.constants import GOLD, DEBUG_RED_OVERLAY,DEBUG_RED
 from core.utils import blit_centered_image
 
 def run_tutorial():

@@ -33,16 +33,16 @@ def update_score(player_name, new_score):
 def blit_centered_image(screen, image):
     screen_width, screen_height = screen.get_size()
     img_width, img_height = image.get_size()
-    img_aspect = img_width / img_height
-    screen_aspect = screen_width / screen_height
+    img_aspect_ratio = img_width / img_height
+    screen_aspect_ratio = screen_width / screen_height
 
-    if img_aspect > screen_aspect:
-        new_width = screen_width
-        new_height = int(screen_width / img_aspect)
+    if img_aspect_ratio > screen_aspect_ratio:   #foto breder dan scherm = breedte resizen naar scherm breedte
+        new_width = screen_width                 # -> verticaal centreren, balken boven en onder
+        new_height = int(screen_width / img_aspect_ratio)
         x, y = 0, (screen_height - new_height) // 2
-    else:
-        new_height = screen_height
-        new_width = int(screen_height * img_aspect)
+    else:                                       #foto hoger dan scherm = hoogte resizen naar scherm hoogte
+        new_height = screen_height              # -> horizontaal centreren, balken links en rechts
+        new_width = int(screen_height * img_aspect_ratio)
         x, y = (screen_width - new_width) // 2, 0
 
     scaled = pygame.transform.smoothscale(image, (new_width, new_height))

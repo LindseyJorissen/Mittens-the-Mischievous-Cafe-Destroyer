@@ -1,14 +1,13 @@
-import pygame
-import sys
+import pygame,sys
+
 from screens import cafe_destroyer,leaderboard_screen
 from core.assets import load_images, load_sounds
-from core.constants import BROWN_SHADOW
+from core.constants import BROWN_SHADOW, DEBUG_RED, DEBUG_RED_OVERLAY
 from core.utils import blit_centered_image
 
 def run_menu():
-
+    debug_toggle = False
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    pygame.display.set_caption("Mittens - Main Menu")
     clock = pygame.time.Clock()
 
     images = load_images()
@@ -17,11 +16,12 @@ def run_menu():
 
     sounds = load_sounds()
     menu_music = sounds["menu_music"]
-
     menu_music.set_volume(0.5)
     menu_music.play(-1)
 
     door_hovered_last = False
+    leaderboard_hovered_last = False
+
     base_door_rect = pygame.Rect(255, 370, 260, 490)
     base_leaderboard_rect = pygame.Rect(820, 185, 390, 130)
 
@@ -31,20 +31,20 @@ def run_menu():
         image_rect = blit_centered_image(screen, pub_closed)
         orig_w, orig_h = pub_closed.get_size()
 
-        sx = image_rect.width / orig_w
-        sy = image_rect.height / orig_h
+        scaled_factor_x = image_rect.width / orig_w
+        scaled_factor_y = image_rect.height / orig_h
 
         door_rect = pygame.Rect(
-            int(image_rect.x + base_door_rect.x * sx),
-            int(image_rect.y + base_door_rect.y * sy),
-            int(base_door_rect.width * sx),
-            int(base_door_rect.height * sy)
+            int(image_rect.x + base_door_rect.x * scaled_factor_x),
+            int(image_rect.y + base_door_rect.y * scaled_factor_y),
+            int(base_door_rect.width * scaled_factor_x),
+            int(base_door_rect.height * scaled_factor_y)
         )
         leaderboard_rect = pygame.Rect(
-            int(image_rect.x + base_leaderboard_rect.x * sx),
-            int(image_rect.y + base_leaderboard_rect.y * sy),
-            int(base_leaderboard_rect.width * sx),
-            int(base_leaderboard_rect.height * sy)
+            int(image_rect.x + base_leaderboard_rect.x * scaled_factor_x),
+            int(image_rect.y + base_leaderboard_rect.y * scaled_factor_y),
+            int(base_leaderboard_rect.width * scaled_factor_x),
+            int(base_leaderboard_rect.height * scaled_factor_y)
         )
 
         is_hovered = door_rect.collidepoint(mouse_pos)
@@ -63,7 +63,7 @@ def run_menu():
                 sounds["knock_wood"].play()
             leaderboard_hovered_last = True
             shadow = pygame.Surface(leaderboard_rect.size, pygame.SRCALPHA)
-            shadow.fill(BROWN_SHADOW)  # translucent black overlay
+            shadow.fill(BROWN_SHADOW)
             screen.blit(shadow, leaderboard_rect.topleft)
         else:
             leaderboard_hovered_last = False
@@ -88,6 +88,19 @@ def run_menu():
                     menu_music.stop()
                     leaderboard_screen.run_screen()
                     menu_music.play(-1)
+
+        ##### DEBUG HOVER ########
+        if debug_toggle:
+            pygame.draw.rect(screen, DEBUG_RED, door_rect, 3)
+            overlay_door = pygame.Surface(door_rect.size, pygame.SRCALPHA)
+            overlay_door.fill(DEBUG_RED_OVERLAY)
+            screen.blit(overlay_door, door_rect.topleft)
+
+            pygame.draw.rect(screen, DEBUG_RED, leaderboard_rect, 3)
+            overlay_leaderboard = pygame.Surface(leaderboard_rect.size, pygame.SRCALPHA)
+            overlay_leaderboard.fill(DEBUG_RED_OVERLAY)
+            screen.blit(overlay_leaderboard, leaderboard_rect.topleft)
+        ############################
 
         pygame.display.flip()
         clock.tick(60)

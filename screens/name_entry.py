@@ -2,11 +2,12 @@ import pygame
 import sys
 import json
 import os
-from core.constants import LEADERBOARD_FILE, GOLD, BROWN_SHADOW
+from core.constants import LEADERBOARD_FILE, GOLD, BROWN_SHADOW , DEBUG_RED,DEBUG_RED_OVERLAY
 from core.utils import blit_centered_image
 from core.assets import load_images,load_fonts,load_sounds
 
 def run_name_entry():
+    debug_toggle = False
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     WIDTH, HEIGHT = screen.get_size()
     clock = pygame.time.Clock()
@@ -108,6 +109,16 @@ def run_name_entry():
                         else:
                             if len(name) < 12:
                                 name += label
+
+        ######### DEBUG HOVER ##########
+        if debug_toggle:
+            for label, rect in buttons.items():
+                pygame.draw.rect(screen, DEBUG_RED, rect, 2)
+
+                overlay = pygame.Surface(rect.size, pygame.SRCALPHA)
+                overlay.fill(DEBUG_RED_OVERLAY)
+                screen.blit(overlay, rect.topleft)
+        ################################
 
         pygame.display.flip()
         clock.tick(60)
